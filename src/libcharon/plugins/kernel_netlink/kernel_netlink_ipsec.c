@@ -1826,6 +1826,20 @@ METHOD(kernel_ipsec_t, add_sa, status_t,
 		goto failed;
 	}
 
+	if (data->mark && ipcomp == IPCOMP_NONE)
+	{
+		enum xfrm_attr_type_t type;
+		uint32_t *mark;
+
+		type = data->inbound ? XFRMA_INPUT_MARK : XFRMA_OUTPUT_MARK;
+		mark = netlink_reserve(hdr, sizeof(request), type, sizeof(*mark));
+		if (!mark)
+		{
+			goto failed;
+		}
+		*mark = data->mark;
+	}
+
 	if (data->tfc && id->proto == IPPROTO_ESP && mode == MODE_TUNNEL)
 	{	/* the kernel supports TFC padding only for tunnel mode ESP SAs */
 		uint32_t *tfcpad;
