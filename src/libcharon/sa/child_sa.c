@@ -891,6 +891,8 @@ static status_t install_internal(private_child_sa_t *this, chunk_t encr,
 		.encap = this->encap,
 		.hw_offload = this->config->get_hw_offload(this->config),
 		.esn = esn,
+		.mark = inbound ? this->config->get_sa_mark(this->config, TRUE)
+						: this->config->get_sa_mark(this->config, FALSE),
 		.initiator = initiator,
 		.inbound = inbound,
 		.update = update,
