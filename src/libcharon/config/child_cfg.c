@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2017 Tobias Brunner
+ * Copyright (C) 2008-2018 Tobias Brunner
  * Copyright (C) 2016 Andreas Steffen
  * Copyright (C) 2005-2007 Martin Willi
  * Copyright (C) 2005 Jan Hutter
@@ -122,6 +122,16 @@ struct private_child_cfg_t {
 	 * Optional mark to install outbound CHILD_SA with
 	 */
 	mark_t mark_out;
+
+	/**
+	 * Optional mark to set to packets after inbound processing
+	 */
+	uint32_t sa_mark_in;
+
+	/**
+	 * Optional mark to set to packets after outbound processing
+	 */
+	uint32_t sa_mark_out;
 
 	/**
 	 * Traffic Flow Confidentiality padding, if enabled
@@ -527,6 +537,12 @@ METHOD(child_cfg_t, get_mark, mark_t,
 	return inbound ? this->mark_in : this->mark_out;
 }
 
+METHOD(child_cfg_t, get_sa_mark, uint32_t,
+	private_child_cfg_t *this, bool inbound)
+{
+	return inbound ? this->sa_mark_in : this->sa_mark_out;
+}
+
 METHOD(child_cfg_t, get_tfc, uint32_t,
 	private_child_cfg_t *this)
 {
@@ -600,6 +616,8 @@ METHOD(child_cfg_t, equals, bool,
 		this->mark_in.mask == other->mark_in.mask &&
 		this->mark_out.value == other->mark_out.value &&
 		this->mark_out.mask == other->mark_out.mask &&
+		this->sa_mark_in == other->sa_mark_in &&
+		this->sa_mark_out == other->sa_mark_out &&
 		this->tfc == other->tfc &&
 		this->manual_prio == other->manual_prio &&
 		this->replay_window == other->replay_window &&
@@ -654,6 +672,7 @@ child_cfg_t *child_cfg_create(char *name, child_cfg_create_t *data)
 			.get_inactivity = _get_inactivity,
 			.get_reqid = _get_reqid,
 			.get_mark = _get_mark,
+			.get_sa_mark = _get_sa_mark,
 			.get_tfc = _get_tfc,
 			.get_manual_prio = _get_manual_prio,
 			.get_interface = _get_interface,
@@ -675,6 +694,8 @@ child_cfg_t *child_cfg_create(char *name, child_cfg_create_t *data)
 		.close_action = data->close_action,
 		.mark_in = data->mark_in,
 		.mark_out = data->mark_out,
+		.sa_mark_in = data->sa_mark_in,
+		.sa_mark_out = data->sa_mark_out,
 		.lifetime = data->lifetime,
 		.inactivity = data->inactivity,
 		.tfc = data->tfc,
